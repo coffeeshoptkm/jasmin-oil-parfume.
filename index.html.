@@ -1,9 +1,72 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <title>JASMIN</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JASMIN OIL PARFUME — каталог изысканных масляных ароматов.">
+  <title>JASMIN OIL PARFUME</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>JASMIN OIL PARFUME</h1>
+
+  <div class="store">
+
+    <header class="header">
+      <h1>JASMIN</h1>
+      <p>OIL PARFUME</p>
+
+      <nav>
+        <a href="#home">HOME</a>
+        <a href="#catalog">COLLECTION</a>
+        <a href="#about">ABOUT</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="home">
+      <p class="gold-text">DISCOVER YOUR SIGNATURE SCENT</p>
+      <h2>The Art of<br>Fine Fragrance</h2>
+      <p>Luxury concentrated oil perfumes</p>
+      <a href="#catalog" class="hero-button">EXPLORE COLLECTION</a>
+    </section>
+
+    <section class="catalog" id="catalog">
+      <p class="gold-text">OUR COLLECTION</p>
+      <h2>Perfume Catalog</h2>
+
+      <input
+        id="search"
+        type="text"
+        placeholder="Search fragrance..."
+      >
+
+      <div class="filters">
+        <button class="filter active" data-category="All">ALL</button>
+        <button class="filter" data-category="Men">MEN</button>
+        <button class="filter" data-category="Women">WOMEN</button>
+        <button class="filter" data-category="Unisex">UNISEX</button>
+      </div>
+
+      <div id="products" class="products"></div>
+    </section>
+
+    <section class="about" id="about">
+      <p class="gold-text">ABOUT JASMIN</p>
+      <h2>Elegance in Every Drop</h2>
+      <p>
+        Discover a world of rich fragrances and timeless elegance.
+        Find the scent that reflects your personality.
+      </p>
+    </section>
+
+    <footer>
+      <h2>JASMIN</h2>
+      <p>OIL PARFUME</p>
+      <p>© 2026 JASMIN. ALL RIGHTS RESERVED.</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
