@@ -1,0 +1,526 @@
+
+const products = [
+  {
+    brand: "Jean Paul Gaultier",
+    name: "Le Male Elixir",
+    category: "Men",
+    price: 170,
+    image: "https://www.deliriumexclusive.com/Images/Products/Normal/660000/668304_2.jpg",
+    description: "Роскошный мужской аромат с насыщенным характером."
+  },
+  {
+    brand: "Jean Paul Gaultier",
+    name: "Le Male",
+    category: "Men",
+    price: 170,
+    image: "https://beautyhouse.com/cdn/shop/files/018owr58wr.png?v=1750805441&width=1600",
+    description: "Классический мужской аромат с узнаваемым характером."
+  },
+  {
+    brand: "Emporio Armani",
+    name: "Stronger With You Intensely",
+    category: "Men",
+    price: 170,
+    image: "https://img-product.sephora.me/dw/image/v2/BKWK_PRD/on/demandware.static/-/Sites-masterCatalog_Sephora/default/dw8827f4e2/images/hi-res/SKU/SKU_480/462048_swatch.jpg?fmt=webp&q=85&sm=fit&sw=1320",
+    description: "Насыщенный и выразительный мужской аромат."
+  },
+  {
+    brand: "Tom Ford",
+    name: "Ombre Leather",
+    category: "Men",
+    price: 175,
+    image: "https://www.essenza.ng/cdn/shop/files/888066075138_50ML_2.jpg?v=1695373378&width=2000",
+    description: "Элегантный аромат с характерным кожаным стилем."
+  },
+  {
+    brand: "Yves Saint Laurent",
+    name: "Black Opium",
+    category: "Women",
+    price: 190,
+    image: "https://dermastore.se/image/cache/data/yves-saint-laurent/yves-saint-laurent-black-opium-edp-50ml-900x900.jpg",
+    description: "Яркий женственный аромат."
+  },
+  {
+    brand: "Yves Saint Laurent",
+    name: "Libre",
+    category: "Women",
+    price: 180,
+    image: "https://mb.web.sapo.io/2d19d98a8b631c4ef024f054a7e94ce584c8c6fa.jpg",
+    description: "Элегантный аромат для уверенного образа."
+  },
+  {
+    brand: "Xerjoff",
+    name: "Naxos",
+    category: "Unisex",
+    price: 190,
+    image: "https://parigallery.com/cdn/shop/files/gallery-naxos-eau-de-parfum-100ml.webp?v=1774879197&width=1024",
+    description: "Премиальный аромат с богатым звучанием."
+  },
+  {
+    brand: "Louis Vuitton",
+    name: "Imagination",
+    category: "Unisex",
+    price: 220,
+    image: "https://boutiquederoyal.com/cdn/shop/files/1_54ef82e8-aa27-413c-a014-d5cc303c0efa_1400x.jpg?v=1752325086",
+    description: "Современный аромат с изысканным характером."
+  }
+];
+
+const volumes = [10, 20, 50, 100];
+const favoritesKey = "jasmin_oil_favorites";
+
+const productsContainer = document.querySelector("#products");
+const searchInput = document.querySelector("#search");
+const filters = document.querySelector(".filters");
+
+let currentCategory = "All";
+let favoritesOnly = false;
+let selectedProduct = null;
+let selectedVolume = 10;
+
+function loadFavorites() {
+  try {
+    const data = JSON.parse(localStorage.getItem(favoritesKey));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+let favorites = loadFavorites();
+
+function saveFavorites() {
+  try {
+    localStorage.setItem(favoritesKey, JSON.stringify(favorites));
+  } catch (error) {
+    console.warn("Favorites could not be saved:", error);
+  }
+}
+
+function isFavorite(index) {
+  return favorites.includes(index);
+}
+
+function priceText(price) {
+  return price.toLocaleString("ru-RU") + " TMT";
+}
+
+function getPrice(product, volume) {
+  return product.price * volume / 10;
+}
+
+// ИЗБРАННОЕ
+
+const favoritesButton = document.createElement("button");
+favoritesButton.type = "button";
+favoritesButton.className = "filter favorites-filter";
+favoritesButton.textContent = "♡ FAVORITES";
+filters.appendChild(favoritesButton);
+
+function updateFavoritesButton() {
+  favoritesButton.textContent =
+    favoritesOnly ? "♥ FAVORITES" : "♡ FAVORITES";
+
+  favoritesButton.classList.toggle("active", favoritesOnly);
+}
+
+// КАТАЛОГ
+
+function showProducts() {
+  const query = searchInput.value.toLowerCase().trim();
+
+  const filtered = products
+    .map((product, index) => ({ ...product, index }))
+    .filter(product => {
+      const categoryMatch =
+        currentCategory === "All" ||
+        product.category === currentCategory;
+
+      const searchMatch =
+        product.name.toLowerCase().includes(query) ||
+        product.brand.toLowerCase().includes(query);
+
+      const favoriteMatch =
+        !favoritesOnly || isFavorite(product.index);
+
+      return categoryMatch && searchMatch && favoriteMatch;
+    });
+
+  productsContainer.innerHTML = filtered.length
+    ? filtered.map(product => `
+      <article class="product-card" data-index="${product.index}">
+
+        <button
+          class="favorite-toggle ${isFavorite(product.index) ? "is-favorite" : ""}"
+          data-index="${product.index}"
+          type="button"
+        >${isFavorite(product.index) ? "♥" : "♡"}</button>
+
+        <img
+          class="product-image"
+          src="${product.image}"
+          alt="${product.brand} ${product.name}"
+          loading="lazy"
+        >
+
+        <div class="brand-label">${product.brand}</div>
+        <div class="product-name-bg">${product.name}</div>
+
+        <div class="product-info">
+          <p>10 ml</p>
+          <p class="price">${priceText(product.price)}</p>
+        </div>
+
+        <p class="open-hint">VIEW DETAILS</p>
+      </article>
+    `).join("")
+    : '<p class="empty-products">No fragrances found.</p>';
+
+  document.querySelectorAll(".filter[data-category]").forEach(button => {
+    button.classList.toggle(
+      "active",
+      !favoritesOnly && button.dataset.category === currentCategory
+    );
+  });
+
+  updateFavoritesButton();
+}
+
+// ОКНО ПОДРОБНОСТЕЙ
+
+const modal = document.createElement("div");
+modal.className = "jasmin-modal";
+
+modal.innerHTML = `
+  <div class="modal-content">
+    <button class="modal-close" type="button">×</button>
+
+    <div class="modal-layout">
+      <div class="modal-image-box">
+        <img class="modal-image" src="" alt="">
+      </div>
+
+      <div class="modal-details">
+        <p class="modal-brand"></p>
+        <h2 class="modal-name"></h2>
+        <p class="modal-description"></p>
+
+        <div class="volume-heading">CHOOSE VOLUME</div>
+
+        <div class="volume-options">
+          ${volumes.map(volume => `
+            <button
+              class="volume-button"
+              data-volume="${volume}"
+              type="button"
+            >${volume} ml</button>
+          `).join("")}
+        </div>
+
+        <div class="modal-price"></div>
+        <button class="modal-favorite" type="button"></button>
+      </div>
+    </div>
+  </div>
+`;
+
+document.body.appendChild(modal);
+
+// СТИЛИ ОКНА
+
+const style = document.createElement("style");
+
+style.textContent = `
+.favorite-toggle {
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:5;
+  width:38px;
+  height:38px;
+  border:1px solid #80683f;
+  border-radius:50%;
+  background:#111;
+  color:#d6b875;
+  font-size:22px;
+  cursor:pointer;
+}
+.favorite-toggle.is-favorite { color:#e4a0a0; }
+.open-hint {
+  color:#c5a568;
+  font-size:9px;
+  letter-spacing:2px;
+  margin-top:12px;
+}
+.empty-products {
+  grid-column:1/-1;
+  padding:35px;
+  color:#c5a568;
+}
+.jasmin-modal {
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,.88);
+  padding:20px;
+  align-items:center;
+  justify-content:center;
+  overflow-y:auto;
+}
+.jasmin-modal.open { display:flex; }
+.modal-content {
+  position:relative;
+  width:100%;
+  max-width:850px;
+  max-height:90vh;
+  overflow-y:auto;
+  background:#15120e;
+  border:1px solid #80683f;
+  padding:35px;
+  color:#f5f1e8;
+}
+.modal-close {
+  position:absolute;
+  top:12px;
+  right:18px;
+  border:0;
+  background:none;
+  color:#d6b875;
+  font-size:32px;
+  cursor:pointer;
+}
+.modal-layout {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:35px;
+  align-items:center;
+}
+.modal-image-box {
+  min-height:350px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(ellipse,#29231b,#0b0b0b);
+}
+.modal-image {
+  width:100%;
+  height:350px;
+  object-fit:contain;
+}
+.modal-brand {
+  color:#c5a568;
+  font-size:12px;
+  letter-spacing:3px;
+  margin-bottom:12px;
+}
+.modal-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;
+  font-weight:normal;
+  margin-bottom:20px;
+}
+.modal-description {
+  color:#b9b1a4;
+  line-height:1.7;
+  margin-bottom:30px;
+}
+.volume-heading {
+  color:#c5a568;
+  font-size:11px;
+  letter-spacing:2px;
+  margin-bottom:15px;
+}
+.volume-options {
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.volume-button {
+  background:transparent;
+  color:#d6b875;
+  border:1px solid #80683f;
+  padding:11px 15px;
+  cursor:pointer;
+}
+.volume-button.active {
+  background:#c5a568;
+  color:#111;
+}
+.modal-price {
+  color:#d6b875;
+  font-size:26px;
+  margin:25px 0;
+}
+.modal-favorite {
+  background:transparent;
+  border:1px solid #80683f;
+  color:#d6b875;
+  padding:12px 18px;
+  cursor:pointer;
+}
+@media(max-width:600px) {
+  .jasmin-modal { padding:10px; }
+  .modal-content { padding:45px 18px 25px; }
+  .modal-layout { grid-template-columns:1fr; gap:20px; }
+  .modal-image-box { min-height:230px; }
+  .modal-image { height:230px; }
+  .modal-name { font-size:26px; }
+}
+`;
+
+document.head.appendChild(style);
+
+// ИЗБРАННОЕ БЕЗ ПОЛНОЙ ПЕРЕРИСОВКИ
+
+function updateFavoriteIcons(index) {
+  const favorite = isFavorite(index);
+
+  productsContainer
+    .querySelectorAll(`.favorite-toggle[data-index="${index}"]`)
+    .forEach(button => {
+      button.textContent = favorite ? "♥" : "♡";
+      button.classList.toggle("is-favorite", favorite);
+    });
+
+  updateFavoritesButton();
+
+  if (selectedProduct === index) {
+    updateModalFavorite();
+  }
+}
+
+function toggleFavorite(index) {
+  if (isFavorite(index)) {
+    favorites = favorites.filter(id => id !== index);
+  } else {
+    favorites.push(index);
+  }
+
+  saveFavorites();
+
+  if (favoritesOnly) {
+    showProducts();
+  } else {
+    updateFavoriteIcons(index);
+  }
+}
+
+// ОТКРЫТИЕ КАРТОЧКИ
+
+function openProduct(index) {
+  selectedProduct = index;
+  selectedVolume = 10;
+
+  const product = products[index];
+
+  modal.querySelector(".modal-image").src = product.image;
+  modal.querySelector(".modal-image").alt = product.name;
+  modal.querySelector(".modal-brand").textContent = product.brand;
+  modal.querySelector(".modal-name").textContent = product.name;
+  modal.querySelector(".modal-description").textContent = product.description;
+
+  updateVolumeButtons();
+  updateModalPrice();
+  updateModalFavorite();
+
+  modal.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function updateModalPrice() {
+  const product = products[selectedProduct];
+
+  modal.querySelector(".modal-price").textContent =
+    priceText(getPrice(product, selectedVolume));
+}
+
+function updateVolumeButtons() {
+  modal.querySelectorAll(".volume-button").forEach(button => {
+    button.classList.toggle(
+      "active",
+      Number(button.dataset.volume) === selectedVolume
+    );
+  });
+}
+
+function updateModalFavorite() {
+  if (selectedProduct === null) return;
+
+  modal.querySelector(".modal-favorite").textContent =
+    isFavorite(selectedProduct)
+      ? "♥ REMOVE FROM FAVORITES"
+      : "♡ ADD TO FAVORITES";
+}
+
+// СОБЫТИЯ
+
+productsContainer.addEventListener("click", event => {
+  const favoriteButton = event.target.closest(".favorite-toggle");
+
+  if (favoriteButton) {
+    event.stopPropagation();
+    toggleFavorite(Number(favoriteButton.dataset.index));
+    return;
+  }
+
+  const card = event.target.closest(".product-card");
+
+  if (card) {
+    openProduct(Number(card.dataset.index));
+  }
+});
+
+modal.querySelector(".volume-options").addEventListener("click", event => {
+  const button = event.target.closest(".volume-button");
+  if (!button) return;
+
+  selectedVolume = Number(button.dataset.volume);
+  updateVolumeButtons();
+  updateModalPrice();
+});
+
+modal.querySelector(".modal-favorite").addEventListener("click", () => {
+  if (selectedProduct !== null) {
+    toggleFavorite(selectedProduct);
+  }
+});
+
+function closeModal() {
+  modal.classList.remove("open");
+  document.body.style.overflow = "";
+  selectedProduct = null;
+}
+
+modal.querySelector(".modal-close").addEventListener("click", closeModal);
+
+modal.addEventListener("click", event => {
+  if (event.target === modal) closeModal();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && modal.classList.contains("open")) {
+    closeModal();
+  }
+});
+
+// ПОИСК И ФИЛЬТРЫ
+
+searchInput.addEventListener("input", showProducts);
+
+document.querySelectorAll(".filter[data-category]").forEach(button => {
+  button.addEventListener("click", () => {
+    currentCategory = button.dataset.category;
+    favoritesOnly = false;
+    showProducts();
+  });
+});
+
+favoritesButton.addEventListener("click", () => {
+  favoritesOnly = !favoritesOnly;
+  showProducts();
+});
+
+// ЗАПУСК
+
+showProducts();
